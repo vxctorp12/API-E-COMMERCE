@@ -39,4 +39,46 @@ Sigue estos pasos para levantar el proyecto en tu entorno local:
    composer install
 
 3. **Configurar variables de entorno:**
+    Copia el archivo de ejemplo y renombralo **.env**
     ```bash
+    cp .env.example .env
+
+4. **Abre el archivo .env y configura tus credenciales de base de datos y de Stripe:**
+    ```bash
+    DB_CONNECTION=mysql
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_DATABASE=nombre_de_tu_bd
+    DB_USERNAME=tu_usuario
+    DB_PASSWORD=tu_contraseña
+
+    STRIPE_KEY=pk_test_tu_clave_publicable
+    STRIPE_SECRET=sk_test_tu_clave_secreta
+    
+5. **Generar claves de la aplicación:**
+    ```bash
+    php artisan key:generate
+    php artisan jwt:secret
+
+6. **Ejecutar migraciones y poblar la base de datos**
+    ```bash
+    php artisan migrate --seed
+
+7. **Generar la documentación de swagger**
+    ```bash
+    php artisan l5-swagger:generate
+
+8. **Inicializar el servidor local**
+    ```bash
+    php artisan serve
+
+📖 Documentación de la API (Swagger)
+Una vez que el servidor esté corriendo, puedes acceder a la documentación interactiva de la API ingresando a la siguiente URL en tu navegador:
+
+👉 http://localhost:8000/api/documentation
+
+Desde allí podrás ver los esquemas de datos, los parámetros requeridos y ejecutar pruebas reales contra los endpoints.
+
+💳 Datos de Prueba (Stripe)
+Para probar el endpoint de creación de órdenes y pagos sin una interfaz frontend, puedes enviar el valor tok_visa en el campo stripe_token del payload JSON. Esto simulará un cobro exitoso en el entorno de pruebas de Stripe.
+
