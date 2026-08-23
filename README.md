@@ -31,5 +31,12 @@ Sigue estos pasos para levantar el proyecto en tu entorno local:
 
 1. **Clonar el repositorio:**
    ```bash
-   git clone [https://github.com/TU_USUARIO/TU_REPOSITORIO.git](https://github.com/TU_USUARIO/TU_REPOSITORIO.git)
-   cd tu-repositorio
+   git clone https://github.com/vxctorp12/API-E-COMMERCE
+   cd API-E-COMMERCE
+
+2. **Instalar dependencias:**
+   ```bash
+   composer install
+
+3. **Configurar variables de entorno:**
+    ```bash
