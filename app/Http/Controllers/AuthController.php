@@ -7,9 +7,29 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Support\Facades\Hash;
+use OpenApi\Attributes as OA;
 
 class AuthController extends Controller
 {
+    #[OA\Post(
+        path: '/auth/register',
+        summary: 'Registrar un nuevo usuario/cliente',
+        tags: ['Autenticación']
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            required: ['name', 'email', 'password', 'password_confirmation'],
+            properties: [
+                new OA\Property(property: 'name', type: 'string', example: 'Juan Pérez'),
+                new OA\Property(property: 'email', type: 'string', format: 'email', example: 'juan@example.com'),
+                new OA\Property(property: 'password', type: 'string', format: 'password', example: 'password123'),
+                new OA\Property(property: 'password_confirmation', type: 'string', format: 'password', example: 'password123')
+            ]
+        )
+    )]
+    #[OA\Response(response: 201, description: 'Usuario registrado exitosamente')]
+    #[OA\Response(response: 422, description: 'Error de validación')]
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::create([
@@ -23,6 +43,23 @@ class AuthController extends Controller
         return $this->respondWithToken($token, 'Usuario registrado exitosamente', 201);
     }
 
+    #[OA\Post(
+        path: '/auth/login',
+        summary: 'Iniciar sesión y obtener token JWT',
+        tags: ['Autenticación']
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            required: ['email', 'password'],
+            properties: [
+                new OA\Property(property: 'email', type: 'string', format: 'email', example: 'juan@example.com'),
+                new OA\Property(property: 'password', type: 'string', format: 'password', example: 'password123')
+            ]
+        )
+    )]
+    #[OA\Response(response: 200, description: 'Login exitoso, retorna el token')]
+    #[OA\Response(response: 401, description: 'Credenciales inválidas')]
     public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->only('email', 'password');
@@ -34,6 +71,14 @@ class AuthController extends Controller
         return $this->respondWithToken($token, 'Login exitoso');
     }
 
+    #[OA\Post(
+        path: '/auth/logout',
+        summary: 'Cerrar sesión e invalidar token JWT',
+        security: [['bearerAuth' => []]],
+        tags: ['Autenticación']
+    )]
+    #[OA\Response(response: 200, description: 'Sesión cerrada correctamente')]
+    #[OA\Response(response: 401, description: 'No autorizado')]
     public function logout(): JsonResponse
     {
         auth('api')->logout();
