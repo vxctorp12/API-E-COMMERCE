@@ -90,22 +90,27 @@ class OrderController extends Controller
 
                 Stripe::setApiKey(env('STRIPE_SECRET'));
 
-                $charge = Charge::create([
-                    'amount' => $totalAmount * 100, 
+                $paymentIntent = \Stripe\PaymentIntent::create([
+                    'amount' => (int) round($totalAmount * 100), 
                     'currency' => 'usd',
-                    'source' => $stripeToken,
+                    'payment_method' => $stripeToken,
+                    'confirm' => true,
+                    'automatic_payment_methods' => [
+                        'enabled' => true,
+                        'allow_redirects' => 'never'
+                    ],
                     'description' => "Compra Orden #{$order->id} - Usuario: {$user->email}",
                 ]);
 
                 Payment::create([
                     'order_id' => $order->id,
-                    'stripe_payment_id' => $charge->id,
+                    'stripe_payment_id' => $paymentIntent->id,
                     'amount' => $totalAmount,
-                    'status' => $charge->status, 
+                    'status' => $paymentIntent->status,  
                     'created_by' => $user->id,
                 ]);
 
-                if ($charge->status === 'succeeded') {
+                if ($paymentIntent->status === 'succeeded') {
                     $order->update(['status' => 'paid']);
                 }
 

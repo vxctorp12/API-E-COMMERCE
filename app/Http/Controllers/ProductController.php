@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
@@ -17,9 +18,19 @@ class ProductController extends Controller
         tags: ['Productos']
     )]
     #[OA\Response(response: 200, description: 'Listado paginado de productos')]
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $products = Product::paginate(10);
+        $query = Product::query();
+
+        if ($request->boolean('in_stock_only')) {
+            $query->where('stock', '>', 0);
+        }
+
+        // Priorizar productos con inventario disponible (stock > 0) y luego los más recientes
+        $products = $query->orderByRaw('CASE WHEN stock > 0 THEN 1 ELSE 0 END DESC')
+            ->latest()
+            ->paginate(12);
+
         return response()->json($products);
     }
 
